@@ -5,7 +5,21 @@ test("code examples, setup commands and event payloads are syntax highlighted", 
 }) => {
   await page.goto("/");
   await page.getByRole("tab", { name: "02 · API map" }).click();
-  await expect(page.locator(".namespace pre code.hljs")).toHaveCount(4);
+  await expect(page.locator(".namespace pre code.hljs")).toHaveCount(9);
+  for (const card of await page.locator(".namespace").all()) {
+    await card.getByText("Inspect the API call", { exact: true }).click();
+    await expect(card.locator("pre code.hljs")).toBeVisible();
+    await expect(card.locator("pre code.hljs")).not.toBeEmpty();
+    await expect(card.locator('pre [class^="hljs-"]').first()).toBeVisible();
+  }
+  await expect(
+    page
+      .locator(".namespace")
+      .filter({
+        has: page.getByRole("heading", { name: "Memory stores", exact: true }),
+      })
+      .locator("pre code"),
+  ).toContainText("client.beta.memoryStores.create");
   await expect(page.locator(".namespace pre .hljs-keyword").first()).toHaveText(
     "const",
   );

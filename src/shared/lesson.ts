@@ -38,6 +38,14 @@ export type LabEvent =
   | { kind: "event"; event: TraceEvent }
   | { kind: "done"; status: "success" | "cancelled" | "error"; text: string }
   | { kind: "error"; text: string };
+interface NamespaceCard {
+  path: string;
+  name: string;
+  role: string;
+  description: string;
+  scope: string;
+  snippet: string;
+}
 export const NAMESPACES = [
   {
     path: "client.beta.agents",
@@ -85,6 +93,12 @@ export const NAMESPACES = [
     role: "Conversation branches",
     description: "Organize distinct histories inside a parent session.",
     scope: "Lesson 06",
+    snippet: `// Inspect the threads of an existing session.
+for await (const thread of client.beta.sessions.threads.list(
+  session.id,
+)) {
+  console.log(thread.id, thread.parent_thread_id);
+}`,
   },
   {
     path: "client.beta.sessions.resources",
@@ -93,6 +107,12 @@ export const NAMESPACES = [
     description:
       "Attach supported files, repositories, or memory to a session.",
     scope: "Lesson 07",
+    snippet: `// fileId identifies a file already uploaded to Anthropic.
+const resource = await client.beta.sessions.resources.add(
+  session.id,
+  { type: "file", file_id: fileId },
+);
+console.log(resource.id);`,
   },
   {
     path: "client.beta.vaults",
@@ -101,14 +121,31 @@ export const NAMESPACES = [
     description:
       "Keep authentication material separate from prompts and ordinary knowledge.",
     scope: "Lesson 08",
+    snippet: `const vault = await client.beta.vaults.create({
+  display_name: "Course integration credentials",
+});
+// Register integration credentials in the vault separately.
+// Reference the vault when creating a session:
+const securedSession = await client.beta.sessions.create({
+  agent: agent.id,
+  environment_id: environment.id,
+  vault_ids: [vault.id],
+});`,
   },
   {
-    path: "client.beta.memory_stores",
+    path: "client.beta.memoryStores",
     name: "Memory stores",
     role: "Durable knowledge",
     description:
       "Retain appropriate non-sensitive context for future sessions.",
     scope: "Lesson 09",
+    snippet: `const store = await client.beta.memoryStores.create({
+  name: "Course study notes",
+  description: "Non-sensitive study notes for future sessions.",
+});
+console.log(store.id);
+// Attach the store to sessions in the memory lesson.
+// This SDK method sends the memory beta header automatically.`,
   },
   {
     path: "client.beta.deployments",
@@ -117,8 +154,22 @@ export const NAMESPACES = [
     description:
       "Configure scheduled execution separately from an individual session.",
     scope: "Lesson 10",
+    snippet: `const deployment = await client.beta.deployments.create({
+  name: "Weekday study reminder",
+  agent: agent.id,
+  environment_id: environment.id,
+  initial_events: [{
+    type: "user.message",
+    content: [{ type: "text", text: "Suggest one study exercise." }],
+  }],
+  schedule: {
+    type: "cron",
+    expression: "0 9 * * 1-5",
+    timezone: "Europe/Madrid",
   },
-] as const;
+});`,
+  },
+] as const satisfies readonly NamespaceCard[];
 export const QUESTIONS = [
   {
     question:

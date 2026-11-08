@@ -18,6 +18,8 @@ The four activities follow the course references: **First session**, **API map**
 
 AI replies display formatted headings, lists, emphasis, tables, and inline code instead of raw Markdown markers. Code snippets use a shared syntax-color theme throughout the application: response code fences, API-map examples, setup commands, the runnable TypeScript walkthrough, and event JSON payloads. Common fenced-code languages are recognized; unlabelled blocks use automatic detection, and unsupported languages remain readable as plain code. Model HTML is discarded and parsed response content is sanitized before display.
 
+All nine API-map cards include an expandable, syntax-highlighted TypeScript example, including the later-lesson previews for threads, session resources, vaults, memory stores, and deployments. These snippets are displayed for study; expanding a card does not execute it. They assume a server-side SDK client and existing resource IDs where indicated.
+
 **How it works** also includes an interactive UML teaching guide: a component architecture diagram, an expandable activity workflow with responsibility swimlanes, and ten selectable steps with highlighted code. It explains request validation, resource reuse, session creation, stream-before-send ordering, event rendering, stop reasons, same-session follow-ups, new sessions, and interruption. The native SVG diagrams have accessible descriptions and can be scrolled on smaller screens.
 
 Preview the [UML architecture](docs/uml-architecture.png) and [complete activity workflow](docs/uml-workflow.png), or explore them interactively in the app’s **How it works** activity.

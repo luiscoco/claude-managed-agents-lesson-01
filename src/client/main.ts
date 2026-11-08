@@ -63,14 +63,12 @@ for (const ns of NAMESPACES) {
   const p = document.createElement("p");
   p.textContent = ns.description;
   card.append(scope, h, path, p);
-  if ("snippet" in ns) {
-    const d = document.createElement("details");
-    const s = document.createElement("summary");
-    s.textContent = "Inspect the API call";
-    const pre = createCodeBlock(ns.snippet, "typescript");
-    d.append(s, pre);
-    card.append(d);
-  }
+  const d = document.createElement("details");
+  const s = document.createElement("summary");
+  s.textContent = "Inspect the API call";
+  const pre = createCodeBlock(ns.snippet, "typescript");
+  d.append(s, pre);
+  card.append(d);
   $("namespace-grid").append(card);
 }
 document
