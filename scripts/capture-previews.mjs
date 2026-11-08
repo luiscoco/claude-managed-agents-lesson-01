@@ -7,7 +7,7 @@ try {
     ["mobile", { width: 390, height: 844 }],
   ]) {
     const page = await browser.newPage({ viewport });
-    await page.goto("http://127.0.0.1:4321");
+    await page.goto(process.env.PREVIEW_URL ?? "http://127.0.0.1:4321");
     await page.getByRole("button", { name: "Run guided walkthrough" }).click();
     await page
       .getByRole("status")
@@ -23,6 +23,11 @@ try {
       ]) {
         await page.getByRole("tab", { name: tab }).click();
         await page.screenshot({ path: `docs/${file}.png`, fullPage: true });
+        if (file === "how-it-works") {
+          await page.locator(".workflow-guide > .uml-scroll").screenshot({ path: "docs/uml-architecture.png" });
+          await page.getByText("Explore the full UML activity workflow", { exact: true }).click();
+          await page.locator(".uml-activity .uml-scroll").screenshot({ path: "docs/uml-workflow.png" });
+        }
       }
     }
     await page.close();

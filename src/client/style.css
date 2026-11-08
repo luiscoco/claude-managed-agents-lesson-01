@@ -888,3 +888,248 @@ pre {
 .question label {
   font-size: 0.9rem;
 }
+
+/* Shared code presentation for responses, lesson examples and event JSON. */
+code.hljs {
+  background: #101a32;
+  color: #e4efff;
+  padding: 0.12em 0.35em;
+  border-radius: 5px;
+}
+.container pre code.hljs {
+  display: block;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  white-space: inherit;
+  overflow-wrap: anywhere;
+}
+pre[data-language]::before {
+  content: attr(data-language);
+  display: block;
+  margin-bottom: 12px;
+  color: #a8bfdc;
+  font:
+    600 0.65rem/1.4 "Segoe UI",
+    sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+pre:focus-visible,
+.response-table:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 4px;
+}
+.formatted-response {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.formatted-response p {
+  white-space: normal;
+  font-size: inherit;
+  margin: 0.75rem 0;
+}
+.formatted-response strong {
+  font-size: inherit;
+  color: inherit;
+}
+.formatted-response em {
+  font-style: italic;
+  color: inherit;
+}
+.formatted-response :is(h1, h2, h3, h4, h5, h6) {
+  font-size: 1.15rem;
+  margin: 1.15rem 0 0.65rem;
+  line-height: 1.3;
+}
+.formatted-response h1 {
+  font-size: 1.5rem;
+}
+.formatted-response h2 {
+  font-size: 1.3rem;
+}
+.formatted-response :is(ul, ol) {
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+.formatted-response li {
+  margin: 0.4rem 0;
+}
+.formatted-response blockquote {
+  margin: 1rem 0;
+  padding: 0.1rem 1rem;
+  border-left: 3px solid var(--blue);
+  color: #405678;
+}
+.formatted-response hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 1.2rem 0;
+}
+.formatted-response > :first-child {
+  margin-top: 0.75rem;
+}
+.formatted-response > :last-child {
+  margin-bottom: 0;
+}
+.response-table {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+.response-table table {
+  border-collapse: collapse;
+  width: 100%;
+  background: #fff;
+}
+.response-table :is(th, td) {
+  border: 1px solid var(--line);
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+}
+.response-table th {
+  background: #eaf2ff;
+}
+
+.workflow-guide {
+  margin: 26px 0;
+}
+.workflow-guide > h3 {
+  margin-top: 12px;
+  font-size: 1.4rem;
+}
+.workflow-guide > p:not(.eyebrow),
+.workflow-step-detail p {
+  font-size: 0.85rem;
+}
+.uml-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #f6faff;
+  margin: 18px 0;
+}
+.uml-scroll:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 4px;
+}
+.uml-scroll svg {
+  display: block;
+  width: 100%;
+  min-width: 940px;
+  height: auto;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 16px;
+}
+.uml-scroll text {
+  fill: #101a44;
+  text-anchor: middle;
+}
+.uml-scroll .uml-title {
+  font-size: 19px;
+  font-weight: 750;
+}
+.uml-scroll .uml-stereotype,
+.uml-scroll .uml-small {
+  font-size: 15px;
+}
+.uml-scroll .uml-caption {
+  font-size: 15px;
+  fill: #526583;
+}
+.uml-scroll .uml-edge-label {
+  font-size: 13px;
+  font-weight: 650;
+  fill: #345c8c;
+}
+.uml-box rect,
+.uml-action rect {
+  fill: white;
+  stroke: #8fb7e4;
+  stroke-width: 2;
+}
+.uml-box.cloud rect {
+  fill: #eaf3ff;
+}
+.uml-edge {
+  fill: none;
+  stroke: #356ca8;
+  stroke-width: 2;
+  marker-end: url(#arch-arrow);
+}
+.uml-scroll marker path {
+  fill: #356ca8;
+}
+.uml-lane {
+  fill: white;
+  stroke: #b7cce5;
+  stroke-width: 2;
+}
+.uml-lane-line {
+  fill: none;
+  stroke: #d3e0ef;
+  stroke-width: 2;
+}
+.uml-decision {
+  fill: #eef5ff;
+  stroke: #356ca8;
+  stroke-width: 2;
+}
+.uml-start {
+  fill: #101a44;
+}
+.uml-final-outer {
+  fill: white;
+  stroke: #101a44;
+  stroke-width: 2;
+}
+.uml-flow-edges path {
+  fill: none;
+  stroke: #356ca8;
+  stroke-width: 2;
+  marker-end: url(#flow-arrow);
+}
+.uml-action.selected rect,
+.uml-decision.selected {
+  fill: #fff0e5;
+  stroke: #ee5425;
+  stroke-width: 3;
+}
+.uml-activity {
+  margin-top: 20px;
+}
+.uml-activity > summary {
+  font-size: 0.9rem;
+  color: #0867c9;
+}
+.workflow-step-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 25px 0;
+}
+.workflow-step-buttons button {
+  font-size: 0.8rem;
+  text-align: left;
+}
+.workflow-step-buttons [aria-pressed="true"] {
+  color: white;
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.workflow-step-detail {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+}
+.workflow-step-detail h4 {
+  font-size: 1.1rem;
+  margin: 0 0 12px;
+}
+@media (max-width: 760px) {
+  .workflow-step-buttons {
+    grid-template-columns: 1fr;
+  }
+}

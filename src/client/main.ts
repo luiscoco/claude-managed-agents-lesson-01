@@ -1,5 +1,11 @@
 import "./style.css";
+import {
+  createCodeBlock,
+  highlightCodeElements,
+  renderResponse,
+} from "./formatting.js";
 import exampleCode from "../examples/first-session.ts?raw";
+import { createWorkflowGuide } from "./workflow.js";
 import {
   BETA,
   FIRST_PROMPT,
@@ -41,6 +47,9 @@ document.querySelector("#app")!.innerHTML = `
 <footer><span>Claude Managed Agents · Lesson 01</span><span>Luis Coco Enríquez · Learn by inspecting.</span></footer></main>`;
 $<HTMLTextAreaElement>("prompt").value = FIRST_PROMPT;
 $("quickstart-code").textContent = exampleCode;
+$("quickstart-code").dataset.language = "typescript";
+document.querySelector<HTMLElement>("#panel-how pre code")!.dataset.language =
+  "powershell";
 for (const ns of NAMESPACES) {
   const card = document.createElement("article");
   card.className = `panel namespace ${ns.scope === "This lesson" ? "current" : ""}`;
@@ -58,13 +67,16 @@ for (const ns of NAMESPACES) {
     const d = document.createElement("details");
     const s = document.createElement("summary");
     s.textContent = "Inspect the API call";
-    const pre = document.createElement("pre");
-    pre.textContent = ns.snippet;
+    const pre = createCodeBlock(ns.snippet, "typescript");
     d.append(s, pre);
     card.append(d);
   }
   $("namespace-grid").append(card);
 }
+document
+  .querySelector("#panel-how .architecture")!
+  .replaceWith(createWorkflowGuide());
+highlightCodeElements(document);
 const answered = new Map<number, boolean>();
 QUESTIONS.forEach((q, i) => {
   const field = document.createElement("fieldset");
@@ -139,7 +151,8 @@ $("larger").onclick = () => setSize("larger");
 let mode: Mode = "demo",
   state: LabState = { mode: "demo", resources: {}, sessions: [] },
   selected = "",
-  busy = false;
+  busy = false,
+  observingTurn = false;
 const traces = new Map<string, LabEvent[]>();
 async function api(path: string, body?: unknown) {
   const response = await fetch(
@@ -184,9 +197,12 @@ function render() {
       a.className = `turn ${turn.role}`;
       const h = document.createElement("strong");
       h.textContent = turn.role === "user" ? "You" : "Study coach";
-      const p = document.createElement("p");
-      p.textContent = turn.text;
-      a.append(h, p);
+      const content =
+        turn.role === "assistant"
+          ? renderResponse(turn.text)
+          : document.createElement("p");
+      if (turn.role === "user") content.textContent = turn.text;
+      a.append(h, content);
       $("conversation").append(a);
     }
   $("timeline").replaceChildren();
@@ -210,7 +226,7 @@ function render() {
     busy || !session?.turns.some((t) => t.role === "assistant");
   $<HTMLButtonElement>("new-session").disabled =
     busy || !state.resources.agentId || !state.resources.environmentId;
-  $<HTMLButtonElement>("stop").disabled = !busy || !selected;
+  $<HTMLButtonElement>("stop").disabled = !observingTurn || !selected;
   for (const [id, ready] of [
     ["agent", Boolean(state.resources.agentId)],
     ["environment", Boolean(state.resources.environmentId)],
@@ -226,11 +242,13 @@ function drawEvent(message: LabEvent) {
     p = document.createElement("p"),
     d = document.createElement("details"),
     summary = document.createElement("summary"),
-    pre = document.createElement("pre");
+    pre = createCodeBlock(
+      JSON.stringify(message.event.payload, null, 2),
+      "json",
+    );
   title.textContent = message.event.type;
   p.textContent = message.event.explanation;
   summary.textContent = "Inspect event payload";
-  pre.textContent = JSON.stringify(message.event.payload, null, 2);
   d.append(summary, pre);
   li.append(title, p, d);
   $("timeline").append(li);
@@ -283,6 +301,8 @@ async function turn(prompt: string) {
   );
   if (!response.ok) throw new Error((await response.json()).error);
   if (!response.body) throw new Error("Streaming is unavailable.");
+  observingTurn = true;
+  $<HTMLButtonElement>("stop").disabled = false;
   const reader = response.body.getReader(),
     decoder = new TextDecoder();
   let buffer = "",
@@ -309,6 +329,8 @@ async function turn(prompt: string) {
           $("stage-events").classList.add("ready");
         } else {
           doneEvent = true;
+          observingTurn = false;
+          $<HTMLButtonElement>("stop").disabled = true;
           status(e.text);
         }
       }
@@ -318,6 +340,8 @@ async function turn(prompt: string) {
         "Connection ended before a turn outcome. Inspect the session before retrying.",
       );
   } finally {
+    observingTurn = false;
+    $<HTMLButtonElement>("stop").disabled = true;
     reader.releaseLock();
   }
 }
@@ -333,6 +357,7 @@ $("walkthrough").onclick = () =>
     await turn($<HTMLTextAreaElement>("prompt").value);
   });
 $("stop").onclick = () => {
+  if (!observingTurn) return;
   $<HTMLButtonElement>("stop").disabled = true;
   status("Requesting an interrupt…");
   void api(`/api/sessions/${encodeURIComponent(selected)}/stop`, {

@@ -12,7 +12,9 @@ test("student completes first turn, follow-up, fresh session, package map and qu
   await expect(page.getByRole("status")).toContainText("Turn complete", {
     timeout: 20_000,
   });
-  await expect(page.locator("#conversation")).toContainText("1. Agent:");
+  await expect(
+    page.locator("#conversation .assistant ol > li").first(),
+  ).toContainText("Agent:");
   const agent = await page.locator("#agent-id").innerText(),
     environment = await page.locator("#environment-id").innerText(),
     first = await page.locator("#session-id").innerText();
@@ -50,6 +52,42 @@ test("student completes first turn, follow-up, fresh session, package map and qu
   expect(errors).toEqual([]);
 });
 test("stop turn and request validation", async ({ page, request }) => {
+  // Keep this UI turn open until Stop is clicked. A 1.2-second demo replay can
+  // finish before a mobile browser scrolls to the button on a busy machine.
+  // Real provider interruption is independently covered by the backend test.
+  await page.addInitScript(() => {
+    const originalFetch = window.fetch.bind(window);
+    let controller: ReadableStreamDefaultController<Uint8Array> | undefined;
+    const encoder = new TextEncoder();
+    window.fetch = async (input, init) => {
+      const url = String(input);
+      if (/\/api\/sessions\/[^/]+\/turn$/.test(url)) {
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            start(stream) {
+              controller = stream;
+              stream.enqueue(
+                encoder.encode(
+                  `data: ${JSON.stringify({ kind: "event", event: { type: "user.message", text: "hello", explanation: "Input received", payload: { type: "user.message" } } })}\n\n`,
+                ),
+              );
+            },
+          }),
+          { headers: { "Content-Type": "text/event-stream" } },
+        );
+      }
+      if (/\/api\/sessions\/[^/]+\/stop$/.test(url)) {
+        controller?.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({ kind: "done", status: "cancelled", text: "Observation stopped. An interrupt was requested." })}\n\n`,
+          ),
+        );
+        controller?.close();
+        return Response.json({ stopped: true });
+      }
+      return originalFetch(input, init);
+    };
+  });
   await page.goto("/");
   await page.getByRole("button", { name: "Run guided walkthrough" }).click();
   await expect(page.locator("#timeline")).toContainText("user.message");
